@@ -3,65 +3,84 @@
 #include "qslider.h"
 #include <QPushButton>
 #include <QWidget>
+#include <QComboBox>
+#include <QPlainTextEdit>
+#include <QLineEdit>
+#include <QColor>
+#include <Qt>
+
+#include <QtSerialPort/QSerialPortInfo>
+#include <QtSerialPort/QSerialPort>
+#include <QDebug>
+#include <QFile>
+#include <QtGui>
+#include <QFileDialog>
+#include <QTimer>
+#include <QTime>
+#include <QMessageBox>
+#include <QGridLayout>
+
+#include <QStyle>
+#include <QScreen>
+
+#include "secondwindow.h"
 #include "ui_mainwindow.h"
 
-QList<QLabel *> servoNum;
-QList<QLabel *> sliderValueLabels;
-QList<QPushButton *> buttonsMin;
-QList<QPushButton *> buttonsMax;
-QList<QPushButton *> buttonsDef;
-QList<QPushButton *> buttonsRes;
-QList<QSlider *> sliders;
-QList<int> sliderValues(6);
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    setWindowTitle(tr("RobotController"));
+    setWindowTitle(tr("Выберите модель робота"));
+    this->setFixedSize(450, 400);
+    s = new secondwindow();
 
-    for (int i = 0; i < 6; ++i){
-        servoNum << new QLabel(this);
-        sliderValueLabels << new QLabel(this);
+        sixServoModelButton = new QPushButton("", this);
+        sixServoModelButton->setGeometry(10, 10, 200, 300);
+        QPixmap pixmap("C:/Users/ThinkBook/Downloads/Biped-humanoid-robot-KHR-2.png");
+        QIcon ButtonIcon(pixmap);
+        sixServoModelButton->setIcon(ButtonIcon);
+        sixServoModelButton->setIconSize(sixServoModelButton->size());
+        connect(sixServoModelButton,SIGNAL(clicked()),this,SLOT(on_sixServoModelButton_clicked() ));
 
-        buttonsMin << new QPushButton(this);
-        buttonsMax << new QPushButton(this);
-        buttonsDef << new QPushButton(this);
-        buttonsRes << new QPushButton(this);
-        sliders << new QSlider(this);
-        sliders.at(i)->setOrientation(Qt::Horizontal);
-    }
-    for (int i = 0; i < 6; ++i){
-        servoNum.at(i)->setText("Servo " + QString::number(i));
-        servoNum.at(i)->setGeometry(10, i*30+25, 50, 10); //длинна от 10 до 60px
+        eigthServoModelButton = new QPushButton("", this);
+        eigthServoModelButton->setGeometry(220, 10, 200, 300);
+        QPixmap pixmap2("C:/Users/ThinkBook/Downloads/Biped-humanoid-robot-KHR-2.png");
+        QIcon ButtonIcon2(pixmap2);
+        eigthServoModelButton->setIcon(ButtonIcon2);
+        eigthServoModelButton->setIconSize(eigthServoModelButton->size());
+        connect(eigthServoModelButton,SIGNAL(clicked()),this,SLOT(on_eigthServoModelButton_clicked() ));
 
-        buttonsMin.at(i)->setText("MIN");
-        buttonsMin.at(i)->setGeometry(60, i*30+20, 35, 20);
-        buttonsMax.at(i)->setText("MAX");
-        buttonsMax.at(i)->setGeometry(95, i*30+20, 35, 20);
-        buttonsDef.at(i)->setText("DEF");
-        buttonsDef.at(i)->setGeometry(130, i*30+20, 35, 20);
-        buttonsRes.at(i)->setText("RES");
-        buttonsRes.at(i)->setGeometry(165, i*30+20, 35, 20);
+        anotherModelButton = new QPushButton("Другая модель робота", this);
+        anotherModelButton->setGeometry(25, 320, 400, 50);
+        connect(anotherModelButton,SIGNAL(clicked()),this,SLOT(on_anotherModelButton_clicked() ));
 
-        sliders.at(i)->setGeometry(210, i*30+25, 350, 10);
-        sliderValueLabels.at(i)->setText(QString::number(sliderValues.at(i)));
-        sliderValueLabels.at(i)->setGeometry(570, i*30+25, 50, 10);
-    }
-    connect(sliders.at(0),SIGNAL(valueChanged(int)),this,SLOT(slider0value(int))); //TODO - связать сигнал слайдера с
-
-
+        connect(sixServoModelButton, SIGNAL(sendData(int)), this, SLOT(on_sixServoModelButton_clicked()));
+        connect(this, SIGNAL(sendData(int)), s, SLOT(recieveData(int)));
 }
-void MainWindow::slider0value(int val){
-    sliderValueLabels.at(0)->setText(QString::number(val));
-    sliderValues[0] = val;
-}
-
 
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+//void MainWindow::setServoCount(int count) { servoCount = count;}
+void MainWindow::on_sixServoModelButton_clicked(){
+
+    emit sendData(6);
+    s->show();
+    this->hide();
+}
+void MainWindow::on_eigthServoModelButton_clicked(){
+    emit sendData(8);
+    s->show();
+    this->close();
+}
+void MainWindow::on_anotherModelButton_clicked(){
+    emit sendData(4);
+    s->show();
+    this->close();
 }
 

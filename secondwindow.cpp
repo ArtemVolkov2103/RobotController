@@ -1,7 +1,7 @@
 #include "secondwindow.h"
 #include "ui_secondwindow.h"
 
-#include "mainwindow.h"
+//#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 #include "qlabel.h"
@@ -28,6 +28,10 @@
 #include <QStyle>
 #include <QScreen>
 #include <QLineEdit>
+#include "QStandardItemModel"
+#include "QStandardItem"
+#include <QTableView>
+#include <QHeaderView>
 
 
 int servoCount = 6;
@@ -43,6 +47,10 @@ bool isConnected=false;
 QSerialPort serialPort;
 int StartPos[12] = {2000,2000,1130, 1250, 1256, 1176,  1200,1850,1280, 1500,600,1800};
 QList<QList<int>> ValuesFromText;
+QStandardItemModel *model = new QStandardItemModel;
+QStandardItem *item;
+QTableView *tableView;
+
 
 secondwindow::secondwindow(QWidget *parent) :
     QWidget(parent),
@@ -55,7 +63,7 @@ secondwindow::secondwindow(QWidget *parent) :
     oneButton = new QPushButton("1", this);
     leftButton = new QPushButton("<", this);
     rightButton = new QPushButton(">", this);
-    textValues = new QPlainTextEdit("",this);
+    //textValues = new QPlainTextEdit("",this);
     QList<QLabel *> rightLabels;
     comPortName = new QComboBox(this);
     baudValuesBox = new QComboBox(this);
@@ -69,8 +77,13 @@ secondwindow::secondwindow(QWidget *parent) :
     recordButton = new QPushButton("Record", this);
     deleteButton = new QPushButton("Delete", this);
     clearButton = new QPushButton("Clear", this);
+    upButton = new QPushButton("Up", this);
+    downButton = new QPushButton("Down", this);
 
 
+    tableView = new QTableView(this);
+    //tableView->setFixedSize(400, 120);
+    connect(tableView, SIGNAL(doubleClicked(QModelIndex)),this,SLOT(OnDoubleClicked(QModelIndex)));
 
     for(int i = 0; i<20; i++){
         sliders << new QSlider(this);
@@ -112,7 +125,7 @@ secondwindow::secondwindow(QWidget *parent) :
 
 void secondwindow::recieveData(int count){
     servoCount = count;
-    this->setFixedSize(700,(200+servoCount*30));
+    this->setFixedSize(750,(200+servoCount*30));
 
     for (int i = 0; i < servoCount; ++i){
         servoNum << new QLineEdit(this);
@@ -143,12 +156,15 @@ void secondwindow::recieveData(int count){
         sliders.at(i)->setGeometry(240, i*30+25, 350, 10);
         sliderValueLabels.at(i)->setText(QString::number(sliderValues.at(i)) + " microseconds");
         sliderValueLabels.at(i)->setGeometry(600, i*30+25, 110, 10);
+        sliders.at(i)->setSliderPosition(StartPos[i]);
     }
     autoButton->setGeometry(10, servoCount*30+25, 20, 20);
     connect(autoButton,SIGNAL(clicked()),this,SLOT(autoButtonClick() ));
+    autoButton->setCheckable(true);
 
     oneButton->setGeometry(10, (servoCount+1)*30+25, 20, 20);
     connect(oneButton,SIGNAL(clicked()),this,SLOT(oneButtonClick() ));
+    oneButton->setCheckable(true);
 
     leftButton->setGeometry(10, (servoCount+2)*30+25, 20, 20);
     connect(leftButton,SIGNAL(clicked()),this,SLOT(leftButtonClick() ));
@@ -156,7 +172,15 @@ void secondwindow::recieveData(int count){
     rightButton->setGeometry(10, (servoCount+3)*30+25, 20, 20);
     connect(rightButton,SIGNAL(clicked()),this,SLOT(rightButtonClick() ));
 
-    textValues->setGeometry(40, servoCount*30+25, 400, 120);
+
+
+    //textValues->setGeometry(40, servoCount*30+25, 400, 120);
+    tableView->setGeometry(40, servoCount*30+25, 400, 120);
+    tableView->setSelectionBehavior(QTableView::SelectRows);//чтобы при клике на ячейку выделялась строка
+    tableView->verticalHeader()->hide();
+    tableView->horizontalHeader()->hide();
+    tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
 
     comPortName->setGeometry(450, servoCount*30+25, 70, 20);
     //comPortName->addItems({"com3", "com5"});
@@ -185,8 +209,19 @@ void secondwindow::recieveData(int count){
 
     clearButton->setGeometry(btnWidth*4+10, (servoCount+4)*30+25, btnWidth, 20);
     connect(clearButton,SIGNAL(clicked()),this,SLOT(clearButtonClick() ));
-}
 
+    upButton->setGeometry(btnWidth*5+10, (servoCount+4)*30+25, btnWidth, 20);
+    connect(upButton,SIGNAL(clicked()),this,SLOT(upButtonClick() ));
+
+    downButton->setGeometry(btnWidth*6+10, (servoCount+4)*30+25, btnWidth, 20);
+    connect(downButton,SIGNAL(clicked()),this,SLOT(downButtonClick() ));
+}
+void Delay(int milliseconds)
+{
+    QTime dieTime= QTime::currentTime().addSecs(1);
+    while (QTime::currentTime() < dieTime)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, milliseconds);
+}
 void secondwindow::findAvailableComPorts(){
     comPortName->clear();
     foreach(const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts()){
@@ -195,40 +230,111 @@ void secondwindow::findAvailableComPorts(){
 
 }
 
+bool isAutoClicked = false;
+bool isOneClicked = false;
+
 void secondwindow::autoButtonClick()
 {
-    serialPort.open(QIODevice::ReadWrite);
-    //if(serialPort.opwen(QIODevice::ReadWrite)){
-    if(sliderValues.at(0) == 0){
-        for(int i=0; i<servoCount; i++){//если значение со слайдера еще не пришло
-            sliderValues[i] = StartPos[i];
+    isOneClicked = false;
+    isAutoClicked = !isAutoClicked;
+    int row = 0;
+    if(tableView->model() != nullptr)
+    while(isAutoClicked){
+        for(int i = 0; i<tableView->model()->columnCount(); i++){
+            model->item(row,i)->setBackground(Qt::cyan);
         }
-    }
-    for(int i=0; i<servoCount; i++){
-        serialPort.write(QString::number(sliderValues[i]).toUtf8());
-        serialPort.write(",");
-    }
-    serialPort.write("@");
+        tableView->focusWidget();
+        /*
+        serialPort.open(QIODevice::ReadWrite);
+        //if(serialPort.opwen(QIODevice::ReadWrite)){
+        if(sliderValues.at(0) == 0){
+            for(int i=0; i<servoCount; i++){//если значение со слайдера еще не пришло
+                sliderValues[i] = StartPos[i];
+            }
+        }
+        for(int i=0; i<servoCount; i++){
+            serialPort.write(QString::number(sliderValues[i]).toUtf8());
+            serialPort.write(",");
+        }
+        serialPort.write("@");
 
-    serialPort.waitForBytesWritten(); // ждем пока дойдет
+        serialPort.waitForBytesWritten(); // ждем пока дойдет
 
-    // и не знаю с чем тут связано, но, чтобы сообщение дошло
-    // надо обязательно прочитать не пришло ли нам чего в ответ
-    //
-    // функция waitForReadyRead(10) проверят не появилось
-    // в ближайшие 10 миллисекунд чего-нибудь в ответ
-    while (serialPort.waitForReadyRead(10)) {
-        // и если появилось мы просто это читаем в пустоту
-        serialPort.readAll();
-        // сам while необходим для того что ответ приходит порциями
-        // и мы хотим считать все что отправилось
+        // и не знаю с чем тут связано, но, чтобы сообщение дошло
+        // надо обязательно прочитать не пришло ли нам чего в ответ
+        //
+        // функция waitForReadyRead(10) проверят не появилось
+        // в ближайшие 10 миллисекунд чего-нибудь в ответ
+        while (serialPort.waitForReadyRead(10)) {
+            // и если появилось мы просто это читаем в пустоту
+            serialPort.readAll();
+            // сам while необходим для того что ответ приходит порциями
+            // и мы хотим считать все что отправилось
+        }
+        serialPort.close();*/
+        Delay(500);
+        for(int i = 0; i<tableView->model()->columnCount(); i++){
+            model->item(row,i)->setBackground(Qt::white);
+        }
+        tableView->focusWidget();
+        if(row < tableView->model()->rowCount()-1){
+            row++;
+        }
+        else
+            row = 0;
     }
-    serialPort.close();
 }
 void secondwindow::oneButtonClick()
 {
+    isAutoClicked = false;
+    isOneClicked = !isOneClicked;
+    if(tableView->model() != nullptr){
+    QItemSelectionModel *selectModel = tableView->selectionModel();
+    if(!selectModel->selectedRows().isEmpty()){
+        int row = selectModel->selectedRows().first().row();
+        while(isOneClicked){
+            for(int i = 0; i<tableView->model()->columnCount(); i++){
+                model->item(row,i)->setBackground(Qt::cyan);
+            }
+            tableView->focusWidget();
 
+            /*serialPort.open(QIODevice::ReadWrite);
+            //if(serialPort.opwen(QIODevice::ReadWrite)){
+            if(sliderValues.at(0) == 0){
+                for(int i=0; i<servoCount; i++){//если значение со слайдера еще не пришло
+                    sliderValues[i] = StartPos[i];
+                }
+            }
+            for(int i=0; i<servoCount; i++){
+                serialPort.write(QString::number(sliderValues[i]).toUtf8());
+                serialPort.write(",");
+            }
+            serialPort.write("@");
+
+            serialPort.waitForBytesWritten(); // ждем пока дойдет
+
+            // и не знаю с чем тут связано, но, чтобы сообщение дошло
+            // надо обязательно прочитать не пришло ли нам чего в ответ
+            //
+            // функция waitForReadyRead(10) проверят не появилось
+            // в ближайшие 10 миллисекунд чего-нибудь в ответ
+            while (serialPort.waitForReadyRead(10)) {
+                // и если появилось мы просто это читаем в пустоту
+                serialPort.readAll();
+                // сам while необходим для того что ответ приходит порциями
+                // и мы хотим считать все что отправилось
+            }
+            serialPort.close();*/
+            Delay(500);
+            for(int i = 0; i<tableView->model()->columnCount(); i++){
+                model->item(row,i)->setBackground(Qt::white);
+            }
+            tableView->focusWidget();
+        }
+    }
+    }
 }
+
 void secondwindow::leftButtonClick()
 {
 
@@ -275,8 +381,12 @@ void secondwindow::loadButtonClick()
 
     if(file.open(QIODevice::ReadOnly |QIODevice::Text))
     {
-        textValues->clear();
+        if(tableView->model() != nullptr)
+            tableView->model()->removeRows(0,model->rowCount());//очищаю предыдущее содержимое таблицы
+
+        //textValues->clear();
         ValuesFromText.clear();
+
         int j=0;//количество строк в файле
         while(!file.atEnd())
         {
@@ -290,13 +400,17 @@ void secondwindow::loadButtonClick()
             QList<int> list;
             for (int i=0;i < lst.length()-1;i++) {
                 list << lst.at(i).toInt();
-                textValues->insertPlainText(lst.at(i));
-
+                //textValues->insertPlainText(lst.at(i));
+                item = new QStandardItem(QString(lst.at(i)));
+                model->setItem(j, i, item);
             }
-            textValues->insertPlainText("\n");
+            //textValues->insertPlainText("\n");
             ValuesFromText.append(list);
             j++;
         }
+        tableView->setModel(model);
+        tableView->resizeRowsToContents();
+        tableView->resizeColumnsToContents();
         for(int i=0; i < servoCount; i++){
             sliders.at(i)->setSliderPosition(ValuesFromText[0][i]);
         }
@@ -310,19 +424,107 @@ void secondwindow::loadButtonClick()
 }
 void secondwindow::saveButtonClick()
 {
-
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    QString::fromUtf8("Save file"),
+                                                    QDir::fromNativeSeparators("C:/1 УЧЕБА/РОБОТ 11.2020/РОБОТ/beepod координаты"),
+                                                    "Text (*.txt *.TXT)");
+    qDebug() << fileName;
+    QFile fileOut(fileName); // Связываем объект с файлом fileout.txt
+    if(fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
+    { // Если файл успешно открыт для записи в текстовом режиме
+        QTextStream writeStream(&fileOut); // Создаем объект класса QTextStream
+        // и передаем ему адрес объекта fileOut
+        for (int i=0; i<model->rowCount(); i++){
+            for (int j=0; j<model->columnCount(); j++){
+                writeStream << tableView->model()->data(tableView->model()->index(i, j)).toInt();// Посылаем строку в поток для записи
+                if(i<model->rowCount()-1 || j<model->columnCount()-1) writeStream << ", ";// чтобы запятая не ставилась после последнего элемента
+            }
+            writeStream << "\n";
+        }
+        fileOut.close(); // Закрываем файл
+    }
+    else
+        qDebug() << "Ошибка: файл невозможно открыть";
 }
 void secondwindow::recordButtonClick()
 {
+    int rowCount = 0;
+
+    try {
+        if(tableView->model() != nullptr){
+            rowCount = tableView->model()->rowCount();
+        }
+        for(int i = 0; i < servoCount; i++){
+            item = new QStandardItem(QString(QString::number(sliderValues[i]).toUtf8()));
+            model->setItem(rowCount, i, item);
+        }
+        tableView->setModel(model);
+        tableView->resizeRowsToContents();
+        tableView->resizeColumnsToContents();
+    }
+    catch (const std::exception& ex) {
+        qDebug() << ex.what();
+    }
+
 
 }
 void secondwindow::deleteButtonClick()
 {
-
+    if(tableView->model() != nullptr){
+        QItemSelectionModel    *selectModel = tableView->selectionModel();
+        QModelIndexList         indexes = selectModel->selectedIndexes();
+        int row = indexes.first().row();
+        tableView->model()->removeRow(row);
+    }
 }
 void secondwindow::clearButtonClick()
 {
+    if(tableView->model() != nullptr)
+        tableView->model()->removeRows(0,model->rowCount());
+}
 
+void secondwindow::upButtonClick(){
+    QItemSelectionModel    *selectModel = tableView->selectionModel();
+    QModelIndexList         indexes = selectModel->selectedIndexes();
+    int row = indexes.first().row();
+    QList<QList<int>> ValuesFromTable;
+    QList<int> list;
+    for(int i=0; i<tableView->model()->rowCount(); i++){
+        for(int j=0; j<tableView->model()->columnCount();j++){
+            list << tableView->model()->data(tableView->model()->index(i, j)).toInt();
+        }
+        ValuesFromTable.append(list);
+    }
+    for(int i=0; i<tableView->model()->rowCount(); i++){
+        for(int j=0; j<tableView->model()->columnCount();j++){
+            if(i == row){
+                item = new QStandardItem(int(ValuesFromTable[i][j]));
+                if(i<0){
+                    model->setItem(i-1, j, item);
+                    item = new QStandardItem(int(ValuesFromTable[i-1][j]));
+                    model->setItem(i, j, item);
+                }
+            }
+        }
+    }
+    tableView->setModel(model);
+
+
+}
+void secondwindow::downButtonClick(){
+    QItemSelectionModel    *selectModel = tableView->selectionModel();
+    QModelIndexList         indexes = selectModel->selectedIndexes();
+    int row = indexes.first().row();
+}
+
+void secondwindow::OnDoubleClicked(const QModelIndex &index)
+{
+    QItemSelectionModel    *selectModel = tableView->selectionModel();
+    QModelIndexList         indexes = selectModel->selectedIndexes();
+    int row = indexes.first().row();
+    for(int i=0; i < servoCount; i++){
+        sliders.at(i)->setSliderPosition(tableView->model()->data(tableView->model()->index(row, i)).toInt());
+    }
 }
 
 void secondwindow::slotTimerAlarm()// Ежесекундно обновляем данные
@@ -362,80 +564,80 @@ void secondwindow::slider0value(int val){
     sliderValues[0] = val;
 }
 void secondwindow::slider1value(int val){
-    sliderValueLabels.at(1)->setText(QString::number(val));
+    sliderValueLabels.at(1)->setText(QString::number(val) + " microseconds");
     sliderValues[1] = val;
 }
 void secondwindow::slider2value(int val){
-    sliderValueLabels.at(2)->setText(QString::number(val));
+    sliderValueLabels.at(2)->setText(QString::number(val) + " microseconds");
     sliderValues[2] = val;
 }
 void secondwindow::slider3value(int val){
-    sliderValueLabels.at(3)->setText(QString::number(val));
+    sliderValueLabels.at(3)->setText(QString::number(val) + " microseconds");
     sliderValues[3] = val;
 }
 void secondwindow::slider4value(int val){
-    sliderValueLabels.at(4)->setText(QString::number(val));
+    sliderValueLabels.at(4)->setText(QString::number(val) + " microseconds");
     sliderValues[4] = val;
 }
 void secondwindow::slider5value(int val){
-    sliderValueLabels.at(5)->setText(QString::number(val));
+    sliderValueLabels.at(5)->setText(QString::number(val) + " microseconds");
     sliderValues[5] = val;
 }
 void secondwindow::slider6value(int val){
-    sliderValueLabels.at(6)->setText(QString::number(val));
+    sliderValueLabels.at(6)->setText(QString::number(val) + " microseconds");
     sliderValues[6] = val;
 }
 void secondwindow::slider7value(int val){
-    sliderValueLabels.at(7)->setText(QString::number(val));
+    sliderValueLabels.at(7)->setText(QString::number(val) + " microseconds");
     sliderValues[7] = val;
 }
 void secondwindow::slider8value(int val){
-    sliderValueLabels.at(8)->setText(QString::number(val));
+    sliderValueLabels.at(8)->setText(QString::number(val) + " microseconds");
     sliderValues[8] = val;
 }
 void secondwindow::slider9value(int val){
-    sliderValueLabels.at(9)->setText(QString::number(val));
+    sliderValueLabels.at(9)->setText(QString::number(val) + " microseconds");
     sliderValues[9] = val;
 }
 void secondwindow::slider10value(int val){
-    sliderValueLabels.at(9)->setText(QString::number(val));
-    sliderValues[9] = val;
+    sliderValueLabels.at(10)->setText(QString::number(val) + " microseconds");
+    sliderValues[10] = val;
 }
 void secondwindow::slider11value(int val){
-    sliderValueLabels.at(9)->setText(QString::number(val));
-    sliderValues[9] = val;
+    sliderValueLabels.at(11)->setText(QString::number(val) + " microseconds");
+    sliderValues[11] = val;
 }
 void secondwindow::slider12value(int val){
-    sliderValueLabels.at(9)->setText(QString::number(val));
-    sliderValues[9] = val;
+    sliderValueLabels.at(12)->setText(QString::number(val) + " microseconds");
+    sliderValues[12] = val;
 }
 void secondwindow::slider13value(int val){
-    sliderValueLabels.at(9)->setText(QString::number(val));
-    sliderValues[9] = val;
+    sliderValueLabels.at(13)->setText(QString::number(val) + " microseconds");
+    sliderValues[13] = val;
 }
 void secondwindow::slider14value(int val){
-    sliderValueLabels.at(9)->setText(QString::number(val));
-    sliderValues[9] = val;
+    sliderValueLabels.at(14)->setText(QString::number(val) + " microseconds");
+    sliderValues[14] = val;
 }
 void secondwindow::slider15value(int val){
-    sliderValueLabels.at(9)->setText(QString::number(val));
-    sliderValues[9] = val;
+    sliderValueLabels.at(15)->setText(QString::number(val) + " microseconds");
+    sliderValues[15] = val;
 }
 void secondwindow::slider16value(int val){
-    sliderValueLabels.at(9)->setText(QString::number(val));
-    sliderValues[9] = val;
+    sliderValueLabels.at(16)->setText(QString::number(val) + " microseconds");
+    sliderValues[16] = val;
 }
 void secondwindow::slider17value(int val){
-    sliderValueLabels.at(9)->setText(QString::number(val));
-    sliderValues[9] = val;
+    sliderValueLabels.at(17)->setText(QString::number(val) + " microseconds");
+    sliderValues[17] = val;
 }
 void secondwindow::slider18value(int val){
-    sliderValueLabels.at(9)->setText(QString::number(val));
-    sliderValues[9] = val;
+    sliderValueLabels.at(18)->setText(QString::number(val) + " microseconds");
+    sliderValues[18] = val;
 }
 void secondwindow::slider19value(int val){
-    sliderValueLabels.at(9)->setText(QString::number(val));
-    sliderValues[9] = val;
+    sliderValueLabels.at(19)->setText(QString::number(val) + " microseconds");
+    sliderValues[19] = val;
 }
 
 secondwindow::~secondwindow()

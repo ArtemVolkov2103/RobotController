@@ -29,6 +29,8 @@ public:
     QPushButton *recordButton;
     QPushButton *deleteButton;
     QPushButton *clearButton;
+    QPushButton *upButton;
+    QPushButton *downButton;
     QPlainTextEdit *textValues;
     QComboBox *baudValuesBox;
     QComboBox *comPortName;
@@ -51,6 +53,12 @@ private slots:
     void recordButtonClick();
     void deleteButtonClick();
     void clearButtonClick();
+
+    void upButtonClick();
+    void downButtonClick();
+
+
+    void OnDoubleClicked(const QModelIndex &index);
 
     void slider0value(int val);
     void slider1value(int val);

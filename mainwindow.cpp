@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
 
         sixServoModelButton = new QPushButton("", this);
         sixServoModelButton->setGeometry(10, 10, 200, 300);
-        QPixmap pixmap("C:/Users/ThinkBook/Downloads/Biped-humanoid-robot-KHR-2.png");
+        QPixmap pixmap("C:/Users/ThinkBook/Pictures/6 servo.png");
         QIcon ButtonIcon(pixmap);
         sixServoModelButton->setIcon(ButtonIcon);
         sixServoModelButton->setIconSize(sixServoModelButton->size());

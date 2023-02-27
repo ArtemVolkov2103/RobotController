@@ -487,24 +487,14 @@ void secondwindow::upButtonClick(){
     QItemSelectionModel    *selectModel = tableView->selectionModel();
     QModelIndexList         indexes = selectModel->selectedIndexes();
     int row = indexes.first().row();
-    QList<QList<int>> ValuesFromTable;
-    QList<int> list;
-    for(int i=0; i<tableView->model()->rowCount(); i++){
-        for(int j=0; j<tableView->model()->columnCount();j++){
-            list << tableView->model()->data(tableView->model()->index(i, j)).toInt();
-        }
-        ValuesFromTable.append(list);
-    }
-    for(int i=0; i<tableView->model()->rowCount(); i++){
-        for(int j=0; j<tableView->model()->columnCount();j++){
-            if(i == row){
-                item = new QStandardItem(int(ValuesFromTable[i][j]));
-                if(i<0){
-                    model->setItem(i-1, j, item);
-                    item = new QStandardItem(int(ValuesFromTable[i-1][j]));
-                    model->setItem(i, j, item);
-                }
-            }
+
+    QStandardItemModel *model = qobject_cast<QStandardItemModel*>(tableView->model());
+    if (model) {
+        if(row > 0){
+        QList<QStandardItem*> firstRowItems = model->takeRow(row);
+        QList<QStandardItem*> secondRowItems = model->takeRow(row);
+        model->insertRow(row, secondRowItems);
+        model->insertRow(row-1, firstRowItems);
         }
     }
     tableView->setModel(model);
@@ -515,6 +505,17 @@ void secondwindow::downButtonClick(){
     QItemSelectionModel    *selectModel = tableView->selectionModel();
     QModelIndexList         indexes = selectModel->selectedIndexes();
     int row = indexes.first().row();
+
+    QStandardItemModel *model = qobject_cast<QStandardItemModel*>(tableView->model());
+    if (model) {
+        if(row < tableView->model()->rowCount()-1){
+            QList<QStandardItem*> firstRowItems = model->takeRow(row);
+            QList<QStandardItem*> secondRowItems = model->takeRow(row);
+            model->insertRow(row, secondRowItems);
+            model->insertRow(row+1, firstRowItems);
+        }
+    }
+    tableView->setModel(model);
 }
 
 void secondwindow::OnDoubleClicked(const QModelIndex &index)

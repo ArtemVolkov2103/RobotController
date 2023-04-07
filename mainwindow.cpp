@@ -36,28 +36,33 @@ MainWindow::MainWindow(QWidget *parent)
     this->setFixedSize(450, 400);
     s = new secondwindow();
 
-        sixServoModelButton = new QPushButton("", this);
-        sixServoModelButton->setGeometry(10, 10, 200, 300);
-        QPixmap pixmap("C:/Users/ThinkBook/Pictures/6 servo.png");
-        QIcon ButtonIcon(pixmap);
-        sixServoModelButton->setIcon(ButtonIcon);
-        sixServoModelButton->setIconSize(sixServoModelButton->size());
-        connect(sixServoModelButton,SIGNAL(clicked()),this,SLOT(on_sixServoModelButton_clicked() ));
+    sixServoModelButton = new QPushButton("", this);
+    sixServoModelButton->setGeometry(10, 10, 200, 300);
+    QPixmap pixmap("C:/Users/ThinkBook/Pictures/6 servo.png");
+    QIcon ButtonIcon(pixmap);
+    sixServoModelButton->setIcon(ButtonIcon);
+    sixServoModelButton->setIconSize(sixServoModelButton->size());
+    connect(sixServoModelButton,SIGNAL(clicked()),this,SLOT(on_sixServoModelButtonClicked() ));
 
-        eigthServoModelButton = new QPushButton("", this);
-        eigthServoModelButton->setGeometry(220, 10, 200, 300);
-        QPixmap pixmap2("C:/Users/ThinkBook/Downloads/Biped-humanoid-robot-KHR-2.png");
-        QIcon ButtonIcon2(pixmap2);
-        eigthServoModelButton->setIcon(ButtonIcon2);
-        eigthServoModelButton->setIconSize(eigthServoModelButton->size());
-        connect(eigthServoModelButton,SIGNAL(clicked()),this,SLOT(on_eigthServoModelButton_clicked() ));
+    eigthServoModelButton = new QPushButton("", this);
+    eigthServoModelButton->setGeometry(220, 10, 200, 300);
+    QPixmap pixmap2("C:/Users/ThinkBook/Downloads/Biped-humanoid-robot-KHR-2.png");
+    QIcon ButtonIcon2(pixmap2);
+    eigthServoModelButton->setIcon(ButtonIcon2);
+    eigthServoModelButton->setIconSize(eigthServoModelButton->size());
+    connect(eigthServoModelButton,SIGNAL(clicked()),this,SLOT(on_eigthServoModelButtonClicked() ));
 
-        anotherModelButton = new QPushButton("Другая модель робота", this);
-        anotherModelButton->setGeometry(25, 320, 400, 50);
-        connect(anotherModelButton,SIGNAL(clicked()),this,SLOT(on_anotherModelButton_clicked() ));
+    anotherModelButton = new QPushButton("Другая модель робота", this);
+    anotherModelButton->setGeometry(10, 320, 200, 50);
+    anotherModelButton->setDisabled(true);
+    connect(anotherModelButton,SIGNAL(clicked()),this,SLOT(on_anotherModelButtonClicked() ));
+    labelForServoCount = new QLabel("Число сервоприводов:",this);
+    labelForServoCount->setGeometry(220, 320, 200, 25);
+    anotherModelServoCount = new QLineEdit("0",this);
+    anotherModelServoCount->setGeometry(220, 345, 200, 25);
+    connect(anotherModelServoCount,SIGNAL(textChanged(QString)),this,SLOT(on_anotherModelServoCountChanged()));
 
-        connect(sixServoModelButton, SIGNAL(sendData(int)), this, SLOT(on_sixServoModelButton_clicked()));
-        connect(this, SIGNAL(sendData(int)), s, SLOT(recieveData(int)));
+    connect(this, SIGNAL(sendData(int)), s, SLOT(recieveData(int)));
 }
 
 
@@ -67,19 +72,28 @@ MainWindow::~MainWindow()
 }
 
 //void MainWindow::setServoCount(int count) { servoCount = count;}
-void MainWindow::on_sixServoModelButton_clicked(){
+void MainWindow::on_sixServoModelButtonClicked(){
 
     emit sendData(6);
     s->show();
     this->hide();
 }
-void MainWindow::on_eigthServoModelButton_clicked(){
+void MainWindow::on_eigthServoModelButtonClicked(){
     emit sendData(8);
     s->show();
     this->close();
 }
-void MainWindow::on_anotherModelButton_clicked(){
-    emit sendData(4);
+
+void MainWindow::on_anotherModelServoCountChanged(){
+    if(anotherModelServoCount->text().toInt()<=20 && anotherModelServoCount->text().toInt() > 0)
+        anotherModelButton->setDisabled(false);
+    else{
+        QMessageBox::warning(this, "Ошибка ввода", "Проверьте, что количество сервоприводов указано верно. Допустимые значения от 1 до 20");
+        anotherModelButton->setDisabled(true);
+    }
+}
+void MainWindow::on_anotherModelButtonClicked(){
+    emit sendData(anotherModelServoCount->text().toUInt());
     s->show();
     this->close();
 }

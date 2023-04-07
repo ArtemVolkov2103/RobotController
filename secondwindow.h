@@ -4,6 +4,7 @@
 #include <QComboBox>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QSignalMapper>
 #include <QWidget>
 
 namespace Ui {
@@ -20,13 +21,13 @@ public:
 public:
     QPushButton *autoButton;
     QPushButton *oneButton;
-    QPushButton *leftButton;
-    QPushButton *rightButton;
+    QPushButton *rtcButton;
     QPushButton *connectButton;
 
     QPushButton *loadButton;
     QPushButton *saveButton;
     QPushButton *recordButton;
+    QPushButton *reWriteButton;
     QPushButton *deleteButton;
     QPushButton *clearButton;
     QPushButton *upButton;
@@ -37,20 +38,23 @@ public:
     QLineEdit *minServoVal;
     QLineEdit *maxServoVal;
 public slots:
-    void recieveData(int count);
+    void recieveData(int);
 private slots:
-    void slotTimerAlarm();
     void findAvailableComPorts();
     void autoButtonClick();
     void oneButtonClick();
-    void leftButtonClick();
-    void rightButtonClick();
+    void rtcButtonClick();
+    void minButtonClick(int);
+    void maxButtonClick(int);
+    void defButtonClick(int);
+    void resButtonClick(int);
 
     void connectButtonClick();
 
     void loadButtonClick();
     void saveButtonClick();
     void recordButtonClick();
+    void reWriteButtonClick();
     void deleteButtonClick();
     void clearButtonClick();
 
@@ -82,6 +86,8 @@ private slots:
     void slider19value(int val);
 private:
     Ui::secondwindow *ui;
+    QSignalMapper *signalMapper;
+
 };
 
 #endif // SECONDWINDOW_H

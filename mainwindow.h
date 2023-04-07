@@ -8,6 +8,9 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QKeyEvent>
+#include "qlabel.h"
+#include <QLineEdit>
+
 
 
 QT_BEGIN_NAMESPACE
@@ -25,14 +28,18 @@ public:
     QPushButton *eigthServoModelButton;
     QPushButton *sixServoModelButton;
     QPushButton *anotherModelButton;
+    QLabel *labelForServoCount;
+    QLineEdit *anotherModelServoCount;
+
 private:
     Ui::MainWindow *ui;
     secondwindow *s;
 signals:
     void sendData(int count);
 private slots:
-    void on_eigthServoModelButton_clicked();
-    void on_sixServoModelButton_clicked();
-    void on_anotherModelButton_clicked();
+    void on_sixServoModelButtonClicked();
+    void on_eigthServoModelButtonClicked();
+    void on_anotherModelServoCountChanged();
+    void on_anotherModelButtonClicked();
 };
 #endif // MAINWINDOW_H

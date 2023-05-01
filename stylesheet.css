@@ -1,0 +1,157 @@
+QLabel{
+font-family:'HelveticaNeueCyr';
+font-weight: 700;
+font-size: 13px;
+}
+#whiteTextLabels{
+    /*color: white;*/
+}
+#anotherModelButton{
+    color: #0E42DC;
+    background-color: #DFE6FD;
+    border-radius: 10px;
+    border: 1px solid #0E42DC;
+}
+#anotherModelButton:disabled{
+    color: #bbcbfa;
+    background-color: #e6e6fa;
+    border-radius: 10px;
+    border: 1px solid #5b81f5;
+}
+#sliderButtons{
+    color: #0E42DC;
+    background-color: #DFE6FD;
+    border-radius: 10px;
+    border: 1px solid #0E42DC;
+}
+#sliderButtons:hover{
+    color: #0E42DC;
+    background-color: #BECDFB;
+    border-radius: 10px;
+    border: 1px solid #0E42DC;
+}
+#sliderButtons:pressed{
+    color: #0E42DC;
+    background-color: #7fc7ff;
+    border-radius: 10px;
+    border: 1px solid #0E42DC;
+}
+#servoNum, #sliderValueLabels{
+    background: #E6DFFD;
+    border: 1px solid #410EDC;
+    border-radius: 4px;
+    font-family: 'HelveticaNeueCyr';
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 16px;
+    color: black;
+    text-align: center;
+}
+QSlider::groove:horizontal {
+    padding: 0 6px 0 6px;
+    background: #C6C5CB;
+    height: 6px;
+}
+
+QSlider::handle:horizontal {
+    background: #FCFCFD;
+    border: 1px solid #C6C5CB;
+    border-radius: 8px;
+    margin: -6px ;
+    width: 16px;
+}
+QSlider::add-page:horizontal {
+    background: #C6C5CB;
+}
+
+QSlider::sub-page:horizontal {
+    background: blue;
+}
+
+#autoButton{
+    font-family:'HelveticaNeueCyr';
+    font-weight: 700;
+    font-size: 13px;
+    background: #FFF7E3;
+    color: #b57900;
+    border: 1px solid #e6a400;
+    border-radius: 6px;
+}
+#autoButton:checked{
+    background: #ffe9b3;
+    color: #b57900;
+    border: 1px solid #e6a400;
+    border-radius: 6px;
+}
+#autoButton:hover{
+    background: #ffe9b3;
+    color: #b57900;
+    border: 1px solid #e6a400;
+    border-radius: 6px;
+}
+#oneButton{
+    font-family:'HelveticaNeueCyr';
+    font-weight: 700;
+    font-size: 13px;
+    background: #bdf0bd;
+    color: #186318;
+    border: 1px solid #186318;
+    border-radius: 6px;
+}
+#oneButton:checked{
+    background: #95e695;
+    color: #186318;
+    border: 1px solid #186318;
+    border-radius: 6px;
+}
+#oneButton:hover{
+    background: #95e695;
+    color: #186318;
+    border: 1px solid #186318;
+    border-radius: 6px;
+}
+#rtcButton{
+    font-family:'HelveticaNeueCyr';
+    font-weight: 700;
+    font-size: 13px;
+    background: #DFE6FD;
+    color: #0E42DC;
+    border: 1px solid #0E42DC;
+    border-radius: 6px;
+}
+#rtcButton:checked{
+    background: #afc0fa;
+    color: #0E42DC;
+    border: 1px solid #0E42DC;
+    border-radius: 6px;
+}
+#rtcButton:hover{
+    background: #afc0fa;
+    color: #0E42DC;
+    border: 1px solid #0E42DC;
+    border-radius: 6px;
+}
+#loadButton, #saveButton, #recordButton, #reWriteButton, #deleteButton, #clearButton{
+    color: #4e5754;
+    background-color: #e6e6e6;
+    border-radius: 6px;
+    border: 1px solid #4e5754;
+    font-family:'HelveticaNeueCyr';
+    font-weight: 700;
+    font-size: 13px;
+}
+#loadButton:hover, #saveButton:hover, #recordButton:hover, #reWriteButton:hover, #deleteButton:hover, #clearButton:hover{
+    color: #4e5754;
+    background-color: #cccccc;
+    border-radius: 6px;
+    border: 1px solid #4e5754;
+
+}
+#loadButton:pressed, #saveButton:pressed, #recordButton:pressed, #reWriteButton:pressed, #deleteButton:pressed, #clearButton:pressed{
+    color: #0E42DC;
+    background-color: #BECDFB;
+    border-radius: 6px;
+    border: 1px solid #0E42DC;
+}
+
+

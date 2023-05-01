@@ -33,7 +33,14 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle(tr("Выберите модель робота"));
-    this->setFixedSize(450, 400);
+    this->setFixedSize(430, 400);
+    /*QPixmap background;
+    background.load("C:/Users/ThinkBook/Downloads/background.jpg");
+        //scaling the image, optional. See the documentation for more options
+    background = background.scaled(this->size(), Qt::KeepAspectRatioByExpanding);
+    QPalette palette;
+    palette.setBrush(QPalette::Window, background);
+    this->setPalette(palette);*/
     s = new secondwindow();
 
     sixServoModelButton = new QPushButton("", this);
@@ -42,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     QIcon ButtonIcon(pixmap);
     sixServoModelButton->setIcon(ButtonIcon);
     sixServoModelButton->setIconSize(sixServoModelButton->size());
-    connect(sixServoModelButton,SIGNAL(clicked()),this,SLOT(on_sixServoModelButtonClicked() ));
+    connect(sixServoModelButton,SIGNAL(clicked()),this,SLOT(on_sixServoModelButtonClicked()));
 
     eigthServoModelButton = new QPushButton("", this);
     eigthServoModelButton->setGeometry(220, 10, 200, 300);
@@ -50,16 +57,20 @@ MainWindow::MainWindow(QWidget *parent)
     QIcon ButtonIcon2(pixmap2);
     eigthServoModelButton->setIcon(ButtonIcon2);
     eigthServoModelButton->setIconSize(eigthServoModelButton->size());
-    connect(eigthServoModelButton,SIGNAL(clicked()),this,SLOT(on_eigthServoModelButtonClicked() ));
+    connect(eigthServoModelButton,SIGNAL(clicked()),this,SLOT(on_eigthServoModelButtonClicked()));
 
     anotherModelButton = new QPushButton("Другая модель робота", this);
     anotherModelButton->setGeometry(10, 320, 200, 50);
     anotherModelButton->setDisabled(true);
-    connect(anotherModelButton,SIGNAL(clicked()),this,SLOT(on_anotherModelButtonClicked() ));
-    labelForServoCount = new QLabel("Число сервоприводов:",this);
+    anotherModelButton->setObjectName("anotherModelButton");
+
+    connect(anotherModelButton,SIGNAL(clicked()),this,SLOT(on_anotherModelButtonClicked()));
+    labelForServoCount = new QLabel("Число сервоприводов:", this);
+    labelForServoCount->setObjectName("whiteTextLabels");
     labelForServoCount->setGeometry(220, 320, 200, 25);
     anotherModelServoCount = new QLineEdit("0",this);
     anotherModelServoCount->setGeometry(220, 345, 200, 25);
+    anotherModelServoCount->setObjectName("servoNum");
     connect(anotherModelServoCount,SIGNAL(textChanged(QString)),this,SLOT(on_anotherModelServoCountChanged()));
 
     connect(this, SIGNAL(sendData(int)), s, SLOT(recieveData(int)));

@@ -37,6 +37,8 @@ public:
     QComboBox *comPortName;
     QLineEdit *minServoVal;
     QLineEdit *maxServoVal;
+    QPushButton *applyServoVal;
+
 public slots:
     void recieveData(int);
 private slots:
@@ -46,7 +48,6 @@ private slots:
     void rtcButtonClick();
     void minButtonClick(int);
     void maxButtonClick(int);
-    void defButtonClick(int);
     void resButtonClick(int);
 
     void connectButtonClick();
@@ -61,6 +62,9 @@ private slots:
     void upButtonClick();
     void downButtonClick();
 
+    void minServoValChanged();
+    void maxServoValChanged();
+    void applyServoValClicked();
 
     void OnDoubleClicked(const QModelIndex &index);
 

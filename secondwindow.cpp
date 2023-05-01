@@ -40,14 +40,14 @@ QList<QLineEdit *> servoNum;
 QList<QLabel *> sliderValueLabels;
 QList<QPushButton *> buttonsMin;
 QList<QPushButton *> buttonsMax;
-QList<QPushButton *> buttonsDef;
+//QList<QPushButton *> buttonsDef;
 QList<QPushButton *> buttonsRes;
 QList<QSlider *> sliders;
 QList<int> sliderValues(20);
 bool isConnected=false;
 QList<QLabel *> textLabels;
 QSerialPort serialPort;
-int StartPos[12] = {2000,2000,1130, 1250, 1256, 1176,  1200,1850,1280, 1500,600,1800};
+int StartPos[20] = {1127, 1127, 1210, 1210, 1210, 1210,  1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500};
 QList<QList<int>> ValuesFromText;
 QStandardItemModel *model = new QStandardItemModel;
 QStandardItem *item;
@@ -64,30 +64,51 @@ secondwindow::secondwindow(QWidget *parent) :
     ui(new Ui::secondwindow)
 {
     ui->setupUi(this);
-    setWindowTitle(tr("Дипломная работа 'RobotController' "));
 
+    //this->setStyleSheet("Background-image: url('C:/Users/ThinkBook/Downloads/1642665931_60-phonoteka-org-p-fon-karbon-63.jpg')");
+    setWindowTitle(tr("Дипломная работа 'RobotController' "));
     for(int i=0; i<20; i++){
         slidersMaxVal[i] = 2500;
         slidersMinVal[i] = 600;
     }
 
     autoButton = new QPushButton("A", this);
+    autoButton->setObjectName("autoButton");
     oneButton = new QPushButton("1", this);
+    oneButton->setObjectName("oneButton");
     rtcButton = new QPushButton("RTC", this);
+    rtcButton->setObjectName("rtcButton");
     comPortName = new QComboBox(this);
     minServoVal = new QLineEdit(this);
+    minServoVal->setObjectName("servoNum");
     maxServoVal = new QLineEdit(this);
+    maxServoVal->setObjectName("servoNum");
+    applyServoVal = new QPushButton("Установить границы", this);
+    applyServoVal->setObjectName("loadButton");
     connectButton = new QPushButton("", this);
-    QPalette p(connectButton->palette());
 
-    loadButton = new QPushButton("Load", this);
-    saveButton = new QPushButton("Save", this);
-    recordButton = new QPushButton("Record", this);
-    reWriteButton = new QPushButton("ReWrite", this);
-    deleteButton = new QPushButton("Delete", this);
-    clearButton = new QPushButton("Clear", this);
-    upButton = new QPushButton("Up", this);
-    downButton = new QPushButton("Down", this);
+    loadButton = new QPushButton("Загрузить", this);
+    loadButton->setObjectName("loadButton");
+    saveButton = new QPushButton("Сохранить", this);
+    saveButton->setObjectName("saveButton");
+    recordButton = new QPushButton("Записать", this);
+    recordButton->setObjectName("recordButton");
+    reWriteButton = new QPushButton("Перезаписать", this);
+    reWriteButton->setObjectName("reWriteButton");
+    deleteButton = new QPushButton("Удалить", this);
+    deleteButton->setObjectName("deleteButton");
+    clearButton = new QPushButton("Очистить", this);
+    clearButton->setObjectName("clearButton");
+    upButton = new QPushButton("", this);
+    QPixmap up(":/up.png");
+    QIcon ButtonUpIcon(up);
+    upButton->setIcon(ButtonUpIcon);
+    upButton->setObjectName("upButton");
+    downButton = new QPushButton("", this);
+    QPixmap down(":/down.png");
+    QIcon ButtonDownIcon(down);
+    downButton->setIcon(ButtonDownIcon);
+    downButton->setObjectName("downButton");
 
     tableView = new QTableView(this);
     connect(tableView, SIGNAL(doubleClicked(QModelIndex)),this,SLOT(OnDoubleClicked(QModelIndex)));
@@ -132,7 +153,14 @@ secondwindow::secondwindow(QWidget *parent) :
 
 void secondwindow::recieveData(int count){
     servoCount = count;
-    this->setFixedSize(750,(200+servoCount*30));
+    //this->setFixedSize(750,(200+servoCount*30));
+    this->setMinimumSize(750,(200+servoCount*30));
+    /*QPixmap background;
+    background.load("C:/Users/ThinkBook/Downloads/background.jpg");
+    background = background.scaled(this->size(), Qt::KeepAspectRatioByExpanding);
+    QPalette palette;
+    palette.setBrush(QPalette::Window, background);
+    this->setPalette(palette);*/
 
     for (int i = 0; i < servoCount; ++i){
         servoNum << new QLineEdit(this);
@@ -140,177 +168,130 @@ void secondwindow::recieveData(int count){
 
         buttonsMin << new QPushButton(this);
         buttonsMax << new QPushButton(this);
-        buttonsDef << new QPushButton(this);
+        //buttonsDef << new QPushButton(this);
         buttonsRes << new QPushButton(this);
     }
     QButtonGroup* minButonsGroup = new QButtonGroup(this);
     QButtonGroup* maxButonsGroup = new QButtonGroup(this);
-    QButtonGroup* defButonsGroup = new QButtonGroup(this);
+    //QButtonGroup* defButonsGroup = new QButtonGroup(this);
     QButtonGroup* resButonsGroup = new QButtonGroup(this);
 
     for (int i = 0; i < servoCount; ++i){
         //servoNum.at(i)->moveCursor (QTextCursor::End);
         servoNum.at(i)->setText("Servo " + QString::number(i));
-        //servoNum.at(i)->insertPlainText("Servo " + QString::number(i));
-        servoNum.at(i)->setGeometry(10, i*30+20, 80, 20); //длинна от 10 до 90px
+        servoNum.at(i)->setObjectName("servoNum");
+        servoNum.at(i)->setGeometry(10, i*30+20, 90, 20); //длинна от 10 до 90px
 
         buttonsMin.at(i)->setText("MIN");
-        buttonsMin.at(i)->setGeometry(90, i*30+20, 35, 20);//-----------------------------------------
+        buttonsMin.at(i)->setGeometry(110, i*30+20, 45, 20);
+        buttonsMin.at(i)->setObjectName("sliderButtons");
         minButonsGroup->addButton(buttonsMin.at(i), i);
 
         buttonsMax.at(i)->setText("MAX");
-        buttonsMax.at(i)->setGeometry(125, i*30+20, 35, 20);
+        buttonsMax.at(i)->setGeometry(160, i*30+20, 45, 20);
         maxButonsGroup->addButton(buttonsMax.at(i), i);
-
-        buttonsDef.at(i)->setText("DEF");
-        buttonsDef.at(i)->setGeometry(160, i*30+20, 35, 20);
-        defButonsGroup->addButton(buttonsDef.at(i), i);
+        buttonsMax.at(i)->setObjectName("sliderButtons");
 
         buttonsRes.at(i)->setText("RES");
-        buttonsRes.at(i)->setGeometry(195, i*30+20, 35, 20);
+        buttonsRes.at(i)->setGeometry(210, i*30+20, 45, 20);
         resButonsGroup->addButton(buttonsRes.at(i), i);
+        buttonsRes.at(i)->setObjectName("sliderButtons");
 
-        sliders.at(i)->setVisible(true);
-        sliders.at(i)->setGeometry(240, i*30+25, 350, 10);
-        sliderValueLabels.at(i)->setText(QString::number(sliderValues.at(i)) + " microseconds");
-        sliderValueLabels.at(i)->setGeometry(600, i*30+25, 110, 10);
+        sliderValueLabels.at(i)->setText(QString::number(sliderValues.at(i)));
+        sliderValueLabels.at(i)->setObjectName("sliderValueLabels");
+        sliderValueLabels.at(i)->setGeometry(280, i*30+20, 50, 20);
+
         sliders.at(i)->setSliderPosition(StartPos[i]);
+        sliders.at(i)->setVisible(true);
+        sliders.at(i)->setGeometry(340, i*30+14, 400, 26);
+
     }
     connect(minButonsGroup, &QButtonGroup::idClicked, this, &secondwindow::minButtonClick);
     connect(maxButonsGroup, &QButtonGroup::idClicked, this, &secondwindow::maxButtonClick);
-    connect(defButonsGroup, &QButtonGroup::idClicked, this, &secondwindow::defButtonClick);
     connect(resButonsGroup, &QButtonGroup::idClicked, this, &secondwindow::resButtonClick);
 
+    connect(autoButton,SIGNAL(clicked()),this,SLOT(autoButtonClick() ));
+    autoButton->setCheckable(true);
+    connect(oneButton,SIGNAL(clicked()),this,SLOT(oneButtonClick() ));
+    //oneButton->setCheckable(true);
+    connect(rtcButton,SIGNAL(clicked()),this,SLOT(rtcButtonClick() ));
+    rtcButton->setCheckable(true);
+    tableView->setSelectionBehavior(QTableView::SelectRows);//чтобы при клике на ячейку выделялась строка
+    tableView->horizontalHeader()->hide();
+    tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    connect(loadButton,SIGNAL(clicked()),this,SLOT(loadButtonClick() ));
+    connect(saveButton,SIGNAL(clicked()),this,SLOT(saveButtonClick() ));
+    connect(recordButton,SIGNAL(clicked()),this,SLOT(recordButtonClick() ));
+    connect(reWriteButton,SIGNAL(clicked()),this,SLOT(reWriteButtonClick() ));
+    connect(deleteButton,SIGNAL(clicked()),this,SLOT(deleteButtonClick() ));
+    connect(clearButton,SIGNAL(clicked()),this,SLOT(clearButtonClick() ));
+    connect(upButton,SIGNAL(clicked()),this,SLOT(upButtonClick() ));
+    connect(downButton,SIGNAL(clicked()),this,SLOT(downButtonClick() ));
+    textLabels << new QLabel(this);
+    textLabels[0]->setText("COM-порт");
+    connectButton->setStyleSheet("border-radius: 40px; border: 6px solid #7d8a86; background-color:rgba(255, 0, 0, 255);");
+    connect(connectButton,SIGNAL(clicked()),this,SLOT(connectButtonClick() ));
+    textLabels << new QLabel(this);
+    textLabels[1]->setText("Мин. положение");
+    minServoVal->setText("600");
+    connect(minServoVal,SIGNAL(textChanged(QString)),this,SLOT(minServoValChanged()));
+    textLabels << new QLabel(this);
+    textLabels[2]->setText("Макс. положение");
+    maxServoVal->setText("2500");
+    connect(maxServoVal,SIGNAL(textChanged(QString)),this,SLOT(maxServoValChanged()));
+    for(int i = 0; i < textLabels.count(); i++)
+        textLabels[i]->setObjectName("whiteTextLabels");
+    connect(applyServoVal,SIGNAL(clicked()),this,SLOT(applyServoValClicked()));
+
     if(count<=14){
-        autoButton->setGeometry(10, servoCount*30+25, 40, 20);
-        connect(autoButton,SIGNAL(clicked()),this,SLOT(autoButtonClick() ));
-        autoButton->setCheckable(true);
-
-        oneButton->setGeometry(10, (servoCount+1)*30+25, 40, 20);
-        connect(oneButton,SIGNAL(clicked()),this,SLOT(oneButtonClick() ));
-        oneButton->setCheckable(true);
-
-        rtcButton->setGeometry(10, (servoCount+2)*30+25, 40, 20);
-        connect(rtcButton,SIGNAL(clicked()),this,SLOT(rtcButtonClick() ));
-        rtcButton->setCheckable(true);
-
+        autoButton->setGeometry(10, servoCount*30+25, 40, 30);
+        oneButton->setGeometry(10, (servoCount+1)*30+35, 40, 30);
+        rtcButton->setGeometry(10, (servoCount+2)*30+45, 40, 30);
         tableView->setGeometry(60, servoCount*30+25, 400, 120);
-        tableView->setSelectionBehavior(QTableView::SelectRows);//чтобы при клике на ячейку выделялась строка
-        tableView->horizontalHeader()->hide();
-        tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-        textLabels << new QLabel(this);
-        textLabels[0]->setText("COM-порт");
-        textLabels[0]->setGeometry(470, servoCount*30+25, 70, 20);
-        comPortName->setGeometry(470, (servoCount+1)*30+25, 70, 20);
-
-        textLabels << new QLabel(this);
-        textLabels[1]->setText("Мин. положение");
-        textLabels[1]->setGeometry(470, (servoCount+3)*30+25, 100, 20);
-        minServoVal->setGeometry(470, (servoCount+4)*30+25, 100, 20);
-        minServoVal->setText("600");
-
-        textLabels << new QLabel(this);
-        textLabels[2]->setText("Макс. положение");
-        textLabels[2]->setGeometry(600, (servoCount+3)*30+25, 100, 20);
-        maxServoVal->setGeometry(600, (servoCount+4)*30+25, 100, 20);
-        maxServoVal->setText("2500");
-        connectButton->setGeometry(560, servoCount*30+25, 150, 80);
-        connectButton->setStyleSheet("border-radius: 10px;""background-color:rgba(255, 0, 0, 255)");
-        connect(connectButton,SIGNAL(clicked()),this,SLOT(connectButtonClick() ));
-
-        int btnWidth = 50;
-        loadButton->setGeometry(btnWidth+10, (servoCount+4)*30+25, btnWidth, 20);
-        connect(loadButton,SIGNAL(clicked()),this,SLOT(loadButtonClick() ));
-
-        saveButton->setGeometry(btnWidth*2+10, (servoCount+4)*30+25, btnWidth, 20);
-        connect(saveButton,SIGNAL(clicked()),this,SLOT(saveButtonClick() ));
-
-        recordButton->setGeometry(btnWidth*3+10, (servoCount+4)*30+25, btnWidth, 20);
-        connect(recordButton,SIGNAL(clicked()),this,SLOT(recordButtonClick() ));
-
-        reWriteButton->setGeometry(btnWidth*4+10, (servoCount+4)*30+25, btnWidth, 20);
-        connect(reWriteButton,SIGNAL(clicked()),this,SLOT(reWriteButtonClick() ));
-
-        deleteButton->setGeometry(btnWidth*5+10, (servoCount+4)*30+25, btnWidth, 20);
-        connect(deleteButton,SIGNAL(clicked()),this,SLOT(deleteButtonClick() ));
-
-        clearButton->setGeometry(btnWidth*6+10, (servoCount+4)*30+25, btnWidth, 20);
-        connect(clearButton,SIGNAL(clicked()),this,SLOT(clearButtonClick() ));
-
-        upButton->setGeometry(btnWidth*7+10, (servoCount+4)*30+25, btnWidth, 20);
-        connect(upButton,SIGNAL(clicked()),this,SLOT(upButtonClick() ));
-
-        downButton->setGeometry(btnWidth*8+10, (servoCount+4)*30+25, btnWidth, 20);
-        connect(downButton,SIGNAL(clicked()),this,SLOT(downButtonClick() ));
+        upButton->setGeometry(470, servoCount*30+25, 20, 20);
+        downButton->setGeometry(470, (servoCount+1)*30+25, 20, 20);
+        textLabels[0]->setGeometry(560, servoCount*30+25, 70, 20);
+        comPortName->setGeometry(560, (servoCount+1)*30+25, 70, 20);
+        textLabels[1]->setGeometry(470, (servoCount+3)*30+25, 120, 20);
+        minServoVal->setGeometry(470, (servoCount+4)*30+25, 120, 20);
+        textLabels[2]->setGeometry(620, (servoCount+3)*30+25, 120, 20);
+        maxServoVal->setGeometry(620, (servoCount+4)*30+25, 120, 20);
+        applyServoVal->setGeometry(470, (servoCount+5)*30+25, 270, 20);
+        connectButton->setGeometry(640, servoCount*30+25, 80, 80);
+        int btnWidth = 100;
+        int btnStart = 80;
+        loadButton->setGeometry(btnStart, (servoCount+4)*30+30, btnWidth, 20);
+        saveButton->setGeometry(btnStart, (servoCount+5)*30+24, btnWidth, 20);
+        recordButton->setGeometry(btnStart+132, (servoCount+4)*30+30, btnWidth, 20);
+        reWriteButton->setGeometry(btnStart+132, (servoCount+5)*30+24, btnWidth, 20);
+        deleteButton->setGeometry(btnStart+132*2, (servoCount+4)*30+30, btnWidth, 20);
+        clearButton->setGeometry(btnStart+132*2, (servoCount+5)*30+24, btnWidth, 20);
     }
     else{
-        this->setFixedSize(1200, 50+servoCount*30);
-        int sliderLeftPix = 710;
-        autoButton->setGeometry(sliderLeftPix+10, 25+200, 40, 20);
-        connect(autoButton,SIGNAL(clicked()),this,SLOT(autoButtonClick() ));
-        autoButton->setCheckable(true);
-
-        oneButton->setGeometry(sliderLeftPix+10, 25*2+200, 40, 20);
-        connect(oneButton,SIGNAL(clicked()),this,SLOT(oneButtonClick() ));
-        oneButton->setCheckable(true);
-
-        rtcButton->setGeometry(sliderLeftPix+10, 25*3+200, 40, 20);
-        connect(rtcButton,SIGNAL(clicked()),this,SLOT(rtcButtonClick() ));
-        rtcButton->setCheckable(true);
-
+        this->setMinimumSize(1280, 50+servoCount*30);
+        this->setWindowState(Qt::WindowMaximized);
+        int sliderLeftPix = 750;
+        autoButton->setGeometry(sliderLeftPix+10, 25+210, 40, 30);
+        oneButton->setGeometry(sliderLeftPix+10, 25*2+220, 40, 30);
+        rtcButton->setGeometry(sliderLeftPix+10, 25*3+230, 40, 30);
         tableView->setGeometry(sliderLeftPix+60, 25+200, 400, 120);
-        tableView->setSelectionBehavior(QTableView::SelectRows);//чтобы при клике на ячейку выделялась строка
-        tableView->horizontalHeader()->hide();
-        tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-        int btnWidth = 50;
-        loadButton->setGeometry(sliderLeftPix+btnWidth+10, 30*4+225, btnWidth, 20);
-        connect(loadButton,SIGNAL(clicked()),this,SLOT(loadButtonClick() ));
-
-        saveButton->setGeometry(sliderLeftPix+btnWidth*2+10, 30*4+225, btnWidth, 20);
-        connect(saveButton,SIGNAL(clicked()),this,SLOT(saveButtonClick() ));
-
-        recordButton->setGeometry(sliderLeftPix+btnWidth*3+10, 30*4+225, btnWidth, 20);
-        connect(recordButton,SIGNAL(clicked()),this,SLOT(recordButtonClick() ));
-
-        reWriteButton->setGeometry(sliderLeftPix+btnWidth*4+10, 30*4+225, btnWidth, 20);
-        connect(reWriteButton,SIGNAL(clicked()),this,SLOT(reWriteButtonClick() ));
-
-        deleteButton->setGeometry(sliderLeftPix+btnWidth*5+10, 30*4+225, btnWidth, 20);
-        connect(deleteButton,SIGNAL(clicked()),this,SLOT(deleteButtonClick() ));
-
-        clearButton->setGeometry(sliderLeftPix+btnWidth*6+10, 30*4+225, btnWidth, 20);
-        connect(clearButton,SIGNAL(clicked()),this,SLOT(clearButtonClick() ));
-
-        upButton->setGeometry(sliderLeftPix+btnWidth*7+10, 30*4+225, btnWidth, 20);
-        connect(upButton,SIGNAL(clicked()),this,SLOT(upButtonClick() ));
-
-        downButton->setGeometry(sliderLeftPix+btnWidth*8+10, 30*4+225, btnWidth, 20);
-        connect(downButton,SIGNAL(clicked()),this,SLOT(downButtonClick() ));
-
-        textLabels << new QLabel(this);
-        textLabels[0]->setText("COM-порт");
-        textLabels[0]->setGeometry(sliderLeftPix+180, 75, 100, 20);
-        comPortName->setGeometry(sliderLeftPix+180, 30+75, 100, 20);
-
-        connectButton->setGeometry(sliderLeftPix+290, 75, 150, 120);
-        connectButton->setStyleSheet("border-radius: 10px;""background-color:rgba(255, 0, 0, 255)");
-        connect(connectButton,SIGNAL(clicked()),this,SLOT(connectButtonClick() ));
-
-        textLabels << new QLabel(this);
-        textLabels[1]->setText("Мин. положение");
-        textLabels[1]->setGeometry(sliderLeftPix+60, 30*2+75, 100, 20);
-        minServoVal->setGeometry(sliderLeftPix+60, 30*3+75, 100, 20);
-        minServoVal->setText("600");
-
-        textLabels << new QLabel(this);
-        textLabels[2]->setText("Макс. положение");
-        textLabels[2]->setGeometry(sliderLeftPix+180, 30*2+75, 100, 20);
-        maxServoVal->setGeometry(sliderLeftPix+180, 30*3+75, 100, 20);
-        maxServoVal->setText("2500");
-
-
+        int btnWidth = 100;
+        loadButton->setGeometry(sliderLeftPix+80, 30*4+230, btnWidth, 20);
+        saveButton->setGeometry(sliderLeftPix+80, 30*5+230, btnWidth, 20);
+        recordButton->setGeometry(sliderLeftPix+80+132, 30*4+230, btnWidth, 20);
+        reWriteButton->setGeometry(sliderLeftPix+80+132, 30*5+230, btnWidth, 20);
+        deleteButton->setGeometry(sliderLeftPix+80+132*2, 30*4+230, btnWidth, 20);
+        clearButton->setGeometry(sliderLeftPix+80+132*2, 30*5+230, btnWidth, 20);
+        upButton->setGeometry(sliderLeftPix+465, 225, 20, 20);
+        downButton->setGeometry(sliderLeftPix+465, 250, 20, 20);
+        textLabels[0]->setGeometry(sliderLeftPix+190, 75, 120, 20);
+        comPortName->setGeometry(sliderLeftPix+190, 30+75, 120, 20);
+        connectButton->setGeometry(sliderLeftPix+320, 75, 80, 80);
+        textLabels[1]->setGeometry(sliderLeftPix+60, 30*2+75, 120, 20);
+        minServoVal->setGeometry(sliderLeftPix+60, 30*3+75, 120, 20);
+        textLabels[2]->setGeometry(sliderLeftPix+190, 30*2+75, 120, 20);
+        maxServoVal->setGeometry(sliderLeftPix+190, 30*3+75, 120, 20);
+        applyServoVal->setGeometry(sliderLeftPix+60, 30*4+75, 250, 20);
 
     }
 }
@@ -334,9 +315,9 @@ bool isRTCButtonClicked = false;
 void secondwindow::autoButtonClick()
 {
     if(serialPort.isOpen()){
-        //autoButton->setChecked(true);
-        isOneClicked = false;
+
         isRTCButtonClicked = false;
+        rtcButton->setChecked(false);
         isAutoClicked = !isAutoClicked;
         int row = 0;
 
@@ -348,36 +329,66 @@ void secondwindow::autoButtonClick()
                     }
                     tableView->focusWidget();
 
-                    //serialPort.open(QIODevice::ReadWrite);
-                    if(sliderValues.at(0) == 0){
-                        for(int i=0; i<servoCount; i++){//если значение со слайдера еще не пришло
-                            sliderValues[i] = StartPos[i];
+                    int max=0;
+                    int delta = 0;
+                    int timeToProcess = 0;
+                    if(row<tableView->model()->rowCount()-1){
+                        for(int i=0; i<tableView->model()->columnCount(); i++){
+                            delta = abs(tableView->model()->data(tableView->model()->index(row, i)).toInt() - tableView->model()->data(tableView->model()->index(row+1, i)).toInt());
+                            if( delta > max){
+                                max = delta;
+                            }
                         }
                     }
+                    else{
+                        for(int i=0; i<tableView->model()->columnCount(); i++){
+                            delta = abs(tableView->model()->data(tableView->model()->index(row, i)).toInt() - tableView->model()->data(tableView->model()->index(0, i)).toInt());
+                            if( delta > max){
+                                max = delta;
+                            }
+                        }
+                    }
+                    timeToProcess = max*servoCount*0.55;
+                    if(timeToProcess<100)
+                        timeToProcess=100;
+                    qDebug()<<timeToProcess;
+
                     for(int i=0; i<servoCount; i++){
                         serialPort.write(QString::number(tableView->model()->data(tableView->model()->index(row, i)).toInt()).toUtf8());
                         serialPort.write(",");
                     }
                     serialPort.write("@");
 
-                    serialPort.waitForBytesWritten(); // ждем пока дойдет
-
-                    // и не знаю с чем тут связано, но, чтобы сообщение дошло
-                    // надо обязательно прочитать не пришло ли нам чего в ответ
-                    //
-                    // функция waitForReadyRead(10) проверят не появилось
-                    // в ближайшие 10 миллисекунд чего-нибудь в ответ
-                    while (serialPort.waitForReadyRead(10)) {
-                        // и если появилось мы просто это читаем в пустоту
-                        serialPort.readAll();
-                        // сам while необходим для того что ответ приходит порциями
-                        // и мы хотим считать все что отправилось
+                    serialPort.waitForBytesWritten(10);
+                    if(serialPort.waitForReadyRead(5000)) {
+                        QByteArray s = serialPort.readAll();
+                        if(!s.contains("#") || s.isEmpty()){
+                            QMessageBox::warning(this, "Ошибка", "Проверьте, что робот подключен к ПК");
+                            rtcButton->setChecked(false);
+                            isRTCButtonClicked = false;
+                            isConnected = false;
+                            connectButton->setStyleSheet("border-radius: 40px; border: 6px solid #7d8a86; border: 5px solid #4e5754; background-color:rgba(255, 0, 0, 255);");
+                            serialPort.close();
+                            qDebug()<<"err";
+                        }
+                        else qDebug()<<s;
                     }
-                    Delay(1500);
+                    else{
+                        QMessageBox::warning(this, "Ошибка", "Проверьте, что робот подключен к ПК");
+                        rtcButton->setChecked(false);
+                        isRTCButtonClicked = false;
+                        isConnected = false;
+                        connectButton->setStyleSheet("border-radius: 40px; border: 6px solid #7d8a86; border: 5px solid #4e5754; background-color:rgba(255, 0, 0, 255);");
+                        serialPort.close();
+                        qDebug()<<"2err";
+                    }
+                    Delay(timeToProcess);
+
                     for(int i = 0; i<tableView->model()->columnCount(); i++){
                         model->item(row,i)->setBackground(Qt::white);
                     }
                     tableView->focusWidget();
+
                     if(row < tableView->model()->rowCount()-1){
                         row++;
                     }
@@ -386,7 +397,9 @@ void secondwindow::autoButtonClick()
                 }
                 else{
                     QMessageBox::warning(this, "Ошибка", "Проверьте, что робот подключен к ПК");
-                    oneButton->setChecked(false);
+                    autoButton->setChecked(false);
+                    isAutoClicked = false;
+
                 }
             }
 
@@ -394,85 +407,89 @@ void secondwindow::autoButtonClick()
         else{
             QMessageBox::information(this, "Предупреждение", "Поле сохранённых поз пустое");
             autoButton->setChecked(false);
+            isAutoClicked = false;
         }
 
     }
     else{
         QMessageBox::warning(this, "Ошибка", "Проверьте, что робот подключен к ПК");
         autoButton->setChecked(false);
+        isAutoClicked = false;
     }
 }
 void secondwindow::oneButtonClick()
 {
     if(serialPort.isOpen()){
         isAutoClicked = false;
+        autoButton->setChecked(false);
         isRTCButtonClicked = false;
+        rtcButton->setChecked(false);
         isOneClicked = !isOneClicked;
 
         if(tableView->model() != nullptr && tableView->model()->rowCount() > 0){
             QItemSelectionModel *selectModel = tableView->selectionModel();
             if(!selectModel->selectedRows().isEmpty()){
                 int row = selectModel->selectedRows().first().row();
-                while(isOneClicked){
-                    if(serialPort.isOpen()){
-                        for(int i = 0; i<tableView->model()->columnCount(); i++){
-                            model->item(row,i)->setBackground(Qt::cyan);
-                        }
-                        tableView->focusWidget();
-                        if(sliderValues.at(0) == 0){
-                            for(int i=0; i<servoCount; i++){//если значение со слайдера еще не пришло
-                                sliderValues[i] = StartPos[i];
-                            }
-                        }
-                        for(int i=0; i<servoCount; i++){
-                            serialPort.write(QString::number(tableView->model()->data(tableView->model()->index(row, i)).toInt()).toUtf8());
-                            serialPort.write(",");
-                        }
-                        serialPort.write("@");
 
-                        serialPort.waitForBytesWritten(); // ждем пока дойдет
+                if(serialPort.isOpen()){
+                    for(int i=0; i<servoCount; i++){
+                        serialPort.write(QString::number(tableView->model()->data(tableView->model()->index(row, i)).toInt()).toUtf8());
+                        serialPort.write(",");
+                    }
+                    serialPort.write("@");
 
-                        // и не знаю с чем тут связано, но, чтобы сообщение дошло
-                        // надо обязательно прочитать не пришло ли нам чего в ответ
-                        //
-                        // функция waitForReadyRead(10) проверят не появилось
-                        // в ближайшие 10 миллисекунд чего-нибудь в ответ
-                        while (serialPort.waitForReadyRead(10)) {
-                            // и если появилось мы просто это читаем в пустоту
-                            serialPort.readAll();
-                            // сам while необходим для того что ответ приходит порциями
-                            // и мы хотим считать все что отправилось
+                    serialPort.waitForBytesWritten(10);
+                    if(serialPort.waitForReadyRead(5000)) {
+                        QByteArray s = serialPort.readAll();
+                        if(!s.contains("#") || s.isEmpty()){
+                            QMessageBox::warning(this, "Ошибка", "Проверьте, что робот подключен к ПК");
+                            rtcButton->setChecked(false);
+                            isRTCButtonClicked = false;
+                            isConnected = false;
+                            connectButton->setStyleSheet("border-radius: 40px; border: 6px solid #7d8a86; border: 5px solid #4e5754; background-color:rgba(255, 0, 0, 255);");
+                            serialPort.close();
+                            qDebug()<<"err";
                         }
-                        Delay(100);
-                        for(int i = 0; i<tableView->model()->columnCount(); i++){
-                            model->item(row,i)->setBackground(Qt::white);
-                        }
-                        tableView->focusWidget();
+                        else qDebug()<<s;
                     }
                     else{
                         QMessageBox::warning(this, "Ошибка", "Проверьте, что робот подключен к ПК");
-                        oneButton->setChecked(false);
+                        rtcButton->setChecked(false);
+                        isRTCButtonClicked = false;
+                        isConnected = false;
+                        connectButton->setStyleSheet("border-radius: 40px; border: 6px solid #7d8a86; border: 5px solid #4e5754; background-color:rgba(255, 0, 0, 255);");
+                        serialPort.close();
+                        qDebug()<<"2err";
                     }
+                    Delay(100);
                 }
+                else{
+                    QMessageBox::warning(this, "Ошибка", "Проверьте, что робот подключен к ПК");
+
+                }
+
             }
             else{
                 QMessageBox::information(this, "Предупреждение", "Не выбрана ни одна поза робота");
-                oneButton->setChecked(false);
             }
+        }
+        else{
+            QMessageBox::information(this, "Предупреждение", "Поле сохранённых поз пустое");
         }
     }
     else{
         QMessageBox::warning(this, "Ошибка", "Проверьте, что робот подключен к ПК");
         oneButton->setChecked(false);
+        isOneClicked = false;
     }
 }
 void secondwindow::rtcButtonClick()//Real time control
 {
-    if(serialPort.isOpen()){
+    if(isConnected){
         isAutoClicked = false;
+        autoButton->setChecked(false);
         isRTCButtonClicked = !isRTCButtonClicked;
-        isOneClicked = false;
-        while(isRTCButtonClicked){
+        while(isRTCButtonClicked && isConnected){
             if(serialPort.isOpen()){
                 if(sliderValues.at(0) == 0){
                     for(int i=0; i<servoCount; i++){//если значение со слайдера еще не пришло
@@ -480,27 +497,49 @@ void secondwindow::rtcButtonClick()//Real time control
                         sliderValues[i] = StartPos[i];
                     }
                 }
+
                 for(int i=0; i<servoCount; i++){
                     serialPort.write(QString::number(sliders.at(i)->value()).toUtf8());
                     serialPort.write(",");
                 }
                 serialPort.write("@");
+                serialPort.waitForBytesWritten(10);
 
-                serialPort.waitForBytesWritten();
-                while (serialPort.waitForReadyRead(10)) {
-                    serialPort.readAll();
+                if(serialPort.waitForReadyRead(5000)) {
+                    QByteArray s = serialPort.readAll();
+                    if(!s.contains("#") || s.isEmpty()){
+                        QMessageBox::warning(this, "Ошибка", "Проверьте, что робот подключен к ПК");
+                        rtcButton->setChecked(false);
+                        isRTCButtonClicked = false;
+                        isConnected = false;
+                        connectButton->setStyleSheet("border-radius: 40px; border: 6px solid #7d8a86; border: 5px solid #4e5754; background-color:rgba(255, 0, 0, 255);");
+                        serialPort.close();
+                        qDebug()<<"err";
+                    }
+                    else qDebug()<<s;
                 }
-                Delay(40);
+                else{
+                    QMessageBox::warning(this, "Ошибка", "Проверьте, что робот подключен к ПК");
+                    rtcButton->setChecked(false);
+                    isRTCButtonClicked = false;
+                    isConnected = false;
+                    connectButton->setStyleSheet("border-radius: 40px; border: 6px solid #7d8a86; border: 5px solid #4e5754; background-color:rgba(255, 0, 0, 255);");
+                    serialPort.close();
+                    qDebug()<<"2err";
+                }
+                Delay(50);
             }
             else{
                 QMessageBox::warning(this, "Ошибка", "Проверьте, что робот подключен к ПК");
                 rtcButton->setChecked(false);
+                isRTCButtonClicked = false;
             }
         }
     }
     else{
         QMessageBox::warning(this, "Ошибка", "Проверьте, что робот подключен к ПК");
         rtcButton->setChecked(false);
+        isRTCButtonClicked = false;
     }
 
 }
@@ -508,7 +547,7 @@ void secondwindow::rtcButtonClick()//Real time control
 void secondwindow::connectButtonClick()
 {
     if (!serialPort.isOpen()) {
-        findAvailableComPorts();
+        //findAvailableComPorts();
         // указали имя к какому порту будем подключаться
         serialPort.setPortName(this->comPortName->currentText());
         qDebug() << comPortName->currentText();
@@ -522,18 +561,18 @@ void secondwindow::connectButtonClick()
             else
                 QMessageBox::warning(this, "Ошибка подключения", "Не удалось подключится к роботу.");
             isConnected = false;
-            connectButton->setStyleSheet("border-radius: 10px;""background-color:rgba(255, 0, 0, 255)");
+            connectButton->setStyleSheet("border-radius: 40px; border: 6px solid #7d8a86; border: 5px solid #4e5754; background-color:rgba(255, 0, 0, 255);");
             serialPort.close();
             return;
         }
         else {
-            connectButton->setStyleSheet("border-radius: 10px;""background-color:rgba(0, 255, 0, 255)");
+            connectButton->setStyleSheet("border-radius: 40px; border: 6px solid #7d8a86; background-color:rgba(0, 255, 0, 255);");
             isConnected = true;
         }
     }
     else
     {
-        connectButton->setStyleSheet("border-radius: 10px;""background-color:rgba(255, 0, 0, 255)");
+        connectButton->setStyleSheet("border-radius: 40px; border: 6px solid #7d8a86; background-color:rgba(255, 0, 0, 255);");
         isConnected = false;
         serialPort.close();
     }
@@ -686,18 +725,14 @@ void secondwindow::clearButtonClick()
 
 void secondwindow::minButtonClick(int servoNum){
     sliders.at(servoNum)->setMinimum(sliders.at(servoNum)->value());
-    qDebug() << servoNum << sliders.at(servoNum)->value();
 }
 void secondwindow::maxButtonClick(int servoNum){
     sliders.at(servoNum)->setMaximum(sliders.at(servoNum)->value());
 }
-void secondwindow::defButtonClick(int servoNum){
-    sliders.at(servoNum)->setSliderPosition(servoMaxValue);
-}
+
 void secondwindow::resButtonClick(int servoNum){
     sliders.at(servoNum)->setMinimum(minServoVal->text().toInt());
     sliders.at(servoNum)->setMaximum(maxServoVal->text().toInt());
-
 }
 
 void secondwindow::upButtonClick(){
@@ -741,6 +776,53 @@ void secondwindow::downButtonClick(){
     }
 }
 
+void secondwindow::minServoValChanged(){
+    /*
+    //qDebug()<<minServoVal->text();
+    if(minServoVal->text().toInt() >= 540 && maxServoVal->text().toInt() > minServoVal->text().toInt()){
+        for(int i=0; i<servoCount; i++){
+            sliders.at(i)->setMinimum(minServoVal->text().toInt());
+        }
+    }
+    else{
+        //if(!minServoVal->hasFocus())
+        minServoVal->setText("540");
+        //qDebug()<<"a";
+    }*/
+}
+
+void secondwindow::maxServoValChanged(){
+    /*
+    if(maxServoVal->text().toInt() <= 2600 && maxServoVal->text().toInt() > minServoVal->text().toInt()){
+        for(int i=0; i<servoCount; i++){
+            sliders.at(i)->setMaximum(maxServoVal->text().toInt());
+        }
+    }
+    else{
+        if(!maxServoVal->hasFocus())
+        maxServoVal->setText("2500");
+    }*/
+}
+
+void secondwindow::applyServoValClicked(){
+    if(maxServoVal->text().toInt() <= 2600 && maxServoVal->text().toInt() > minServoVal->text().toInt()){
+        for(int i=0; i<servoCount; i++){
+            sliders.at(i)->setMaximum(maxServoVal->text().toInt());
+        }
+    }
+    else{
+         maxServoVal->setText("2500");
+    }
+    if(minServoVal->text().toInt() >= 540 && maxServoVal->text().toInt() > minServoVal->text().toInt()){
+        for(int i=0; i<servoCount; i++){
+            sliders.at(i)->setMinimum(minServoVal->text().toInt());
+        }
+    }
+    else{
+        minServoVal->setText("540");
+    }
+}
+
 void secondwindow::OnDoubleClicked(const QModelIndex &index)
 {
     QItemSelectionModel    *selectModel = tableView->selectionModel();
@@ -752,83 +834,83 @@ void secondwindow::OnDoubleClicked(const QModelIndex &index)
 }
 
 void secondwindow::slider0value(int val){
-    sliderValueLabels.at(0)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(0)->setText(QString::number(val));
     sliderValues[0] = val;
 }
 void secondwindow::slider1value(int val){
-    sliderValueLabels.at(1)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(1)->setText(QString::number(val) );
     sliderValues[1] = val;
 }
 void secondwindow::slider2value(int val){
-    sliderValueLabels.at(2)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(2)->setText(QString::number(val) );
     sliderValues[2] = val;
 }
 void secondwindow::slider3value(int val){
-    sliderValueLabels.at(3)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(3)->setText(QString::number(val) );
     sliderValues[3] = val;
 }
 void secondwindow::slider4value(int val){
-    sliderValueLabels.at(4)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(4)->setText(QString::number(val) );
     sliderValues[4] = val;
 }
 void secondwindow::slider5value(int val){
-    sliderValueLabels.at(5)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(5)->setText(QString::number(val) );
     sliderValues[5] = val;
 }
 void secondwindow::slider6value(int val){
-    sliderValueLabels.at(6)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(6)->setText(QString::number(val) );
     sliderValues[6] = val;
 }
 void secondwindow::slider7value(int val){
-    sliderValueLabels.at(7)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(7)->setText(QString::number(val) );
     sliderValues[7] = val;
 }
 void secondwindow::slider8value(int val){
-    sliderValueLabels.at(8)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(8)->setText(QString::number(val) );
     sliderValues[8] = val;
 }
 void secondwindow::slider9value(int val){
-    sliderValueLabels.at(9)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(9)->setText(QString::number(val) );
     sliderValues[9] = val;
 }
 void secondwindow::slider10value(int val){
-    sliderValueLabels.at(10)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(10)->setText(QString::number(val) );
     sliderValues[10] = val;
 }
 void secondwindow::slider11value(int val){
-    sliderValueLabels.at(11)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(11)->setText(QString::number(val) );
     sliderValues[11] = val;
 }
 void secondwindow::slider12value(int val){
-    sliderValueLabels.at(12)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(12)->setText(QString::number(val) );
     sliderValues[12] = val;
 }
 void secondwindow::slider13value(int val){
-    sliderValueLabels.at(13)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(13)->setText(QString::number(val) );
     sliderValues[13] = val;
 }
 void secondwindow::slider14value(int val){
-    sliderValueLabels.at(14)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(14)->setText(QString::number(val) );
     sliderValues[14] = val;
 }
 void secondwindow::slider15value(int val){
-    sliderValueLabels.at(15)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(15)->setText(QString::number(val) );
     sliderValues[15] = val;
 }
 void secondwindow::slider16value(int val){
-    sliderValueLabels.at(16)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(16)->setText(QString::number(val) );
     sliderValues[16] = val;
 }
 void secondwindow::slider17value(int val){
-    sliderValueLabels.at(17)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(17)->setText(QString::number(val) );
     sliderValues[17] = val;
 }
 void secondwindow::slider18value(int val){
-    sliderValueLabels.at(18)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(18)->setText(QString::number(val) );
     sliderValues[18] = val;
 }
 void secondwindow::slider19value(int val){
-    sliderValueLabels.at(19)->setText(QString::number(val) + " microseconds");
+    sliderValueLabels.at(19)->setText(QString::number(val) );
     sliderValues[19] = val;
 }
 

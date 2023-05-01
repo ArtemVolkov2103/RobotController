@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>stylesheet.css</file>
+        <file>down.png</file>
+        <file>up.png</file>
+    </qresource>
+</RCC>

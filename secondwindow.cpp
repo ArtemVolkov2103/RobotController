@@ -56,6 +56,8 @@ int servoMinValue = 600;
 int servoMaxValue = 2500;
 QList<int> slidersMaxVal(20);
 QList<int> slidersMinVal(20);
+QRegularExpression re("^[,0-9\\s]+$");//НЕ(^) запятые, цифры, пробелы
+
 
 
 
@@ -581,10 +583,9 @@ void secondwindow::loadButtonClick()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     QString::fromUtf8("Открыть файл"),
-                                                    QDir::fromNativeSeparators("C:/1 УЧЕБА/РОБОТ 11.2020/РОБОТ/beepod координаты"),
+                                                    QDir::fromNativeSeparators(QDir::currentPath()),
                                                     "Text (*.txt *.TXT)");
     QFile file(fileName);//путь до файла
-    QRegularExpression re("^[,0-9\\s]+$");//НЕ(^) запятые, цифры, пробелы
     bool isFileValid = true;
     if(file.open(QIODevice::ReadOnly |QIODevice::Text))//прохожусь по файлу, чтобы проверить его содержание
     {
@@ -609,9 +610,11 @@ void secondwindow::loadButtonClick()
         }
         file.close();
     }
-    else
-        QMessageBox::warning(this, "Ошибка при открытии файла", "Файл не удалось открыть");
-
+    else{
+        QString err = file.errorString();
+        if(err != "No file name specified")
+            QMessageBox::warning(this, "Ошибка при открытии файла", "Файл не удалось открыть");
+    }
 
     if(isFileValid){//если это файл поз робота
         if(file.open(QIODevice::ReadOnly |QIODevice::Text))

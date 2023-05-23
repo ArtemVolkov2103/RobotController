@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle(tr("Выберите модель робота"));
-    this->setFixedSize(430, 400);
+    this->setFixedSize(430, 430);
     /*QPixmap background;
     background.load("C:/Users/ThinkBook/Downloads/background.jpg");
         //scaling the image, optional. See the documentation for more options
@@ -45,31 +45,37 @@ MainWindow::MainWindow(QWidget *parent)
 
     sixServoModelButton = new QPushButton("", this);
     sixServoModelButton->setGeometry(10, 10, 200, 300);
-    QPixmap pixmap("C:/Users/ThinkBook/Pictures/6 servo.png");
+    QPixmap pixmap(":/6 servo.png");//"C:/Users/ThinkBook/Pictures/6 servo.png"
     QIcon ButtonIcon(pixmap);
     sixServoModelButton->setIcon(ButtonIcon);
     sixServoModelButton->setIconSize(sixServoModelButton->size());
     connect(sixServoModelButton,SIGNAL(clicked()),this,SLOT(on_sixServoModelButtonClicked()));
+    labelForSixServo = new QLabel("6 сервоприводов", this);
+    labelForSixServo->setGeometry(10, 320, 200, 20);
+    labelForSixServo->setAlignment(Qt::AlignHCenter);
 
     eigthServoModelButton = new QPushButton("", this);
     eigthServoModelButton->setGeometry(220, 10, 200, 300);
-    QPixmap pixmap2("C:/Users/ThinkBook/Downloads/Biped-humanoid-robot-KHR-2.png");
+    QPixmap pixmap2(":/8 servo.png");//C:/Users/ThinkBook/Downloads/Biped-humanoid-robot-KHR-2.png
     QIcon ButtonIcon2(pixmap2);
     eigthServoModelButton->setIcon(ButtonIcon2);
     eigthServoModelButton->setIconSize(eigthServoModelButton->size());
     connect(eigthServoModelButton,SIGNAL(clicked()),this,SLOT(on_eigthServoModelButtonClicked()));
+    labelForEightServo = new QLabel("8 сервоприводов", this);
+    labelForEightServo->setGeometry(220, 320, 200, 20);
+    labelForEightServo->setAlignment(Qt::AlignHCenter);
 
     anotherModelButton = new QPushButton("Другая модель робота", this);
-    anotherModelButton->setGeometry(10, 320, 200, 50);
+    anotherModelButton->setGeometry(10, 360, 200, 50);
     anotherModelButton->setDisabled(true);
     anotherModelButton->setObjectName("anotherModelButton");
 
     connect(anotherModelButton,SIGNAL(clicked()),this,SLOT(on_anotherModelButtonClicked()));
     labelForServoCount = new QLabel("Число сервоприводов:", this);
     labelForServoCount->setObjectName("whiteTextLabels");
-    labelForServoCount->setGeometry(220, 320, 200, 25);
+    labelForServoCount->setGeometry(220, 360, 200, 25);
     anotherModelServoCount = new QLineEdit("0",this);
-    anotherModelServoCount->setGeometry(220, 345, 200, 25);
+    anotherModelServoCount->setGeometry(220, 385, 200, 25);
     anotherModelServoCount->setObjectName("servoNum");
     connect(anotherModelServoCount,SIGNAL(textChanged(QString)),this,SLOT(on_anotherModelServoCountChanged()));
 

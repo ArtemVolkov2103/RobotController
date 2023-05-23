@@ -28,6 +28,9 @@ public:
     QPushButton *eigthServoModelButton;
     QPushButton *sixServoModelButton;
     QPushButton *anotherModelButton;
+    QLabel *labelForSixServo;
+    QLabel *labelForEightServo;
+
     QLabel *labelForServoCount;
     QLineEdit *anotherModelServoCount;
 

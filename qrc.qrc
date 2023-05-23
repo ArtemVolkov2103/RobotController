@@ -3,5 +3,8 @@
         <file>stylesheet.css</file>
         <file>down.png</file>
         <file>up.png</file>
+        <file>6 servo.png</file>
+        <file>8 servo.png</file>
+        <file>logo.ico</file>
     </qresource>
 </RCC>

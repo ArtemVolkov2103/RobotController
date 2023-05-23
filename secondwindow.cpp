@@ -306,7 +306,9 @@ void Delay(int milliseconds)
 void secondwindow::findAvailableComPorts(){
     comPortName->clear();
     foreach(const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts()){
-        comPortName->addItem(serialPortInfo.portName());
+        if(serialPortInfo.description().contains("USB-SERIAL CH340") || serialPortInfo.description().contains("Arduino"))
+            comPortName->addItem(serialPortInfo.portName());
+        //qDebug()<<serialPortInfo.description()<<" @@@ "<<serialPortInfo.manufacturer();//USB-SERIAL CH340
     }
 }
 
@@ -655,7 +657,7 @@ void secondwindow::saveButtonClick()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
                                                     QString::fromUtf8("Save file"),
-                                                    QDir::fromNativeSeparators("C:/1 УЧЕБА/РОБОТ 11.2020/РОБОТ/beepod координаты"),
+                                                    QDir::fromNativeSeparators(QDir::currentPath()),
                                                     "Text (*.txt *.TXT)");
     qDebug() << fileName;
     QFile fileOut(fileName); // Связываем объект с файлом fileout.txt
@@ -672,8 +674,11 @@ void secondwindow::saveButtonClick()
         }
         fileOut.close(); // Закрываем файл
     }
-    else
-        QMessageBox::warning(this, "Ошибка при открытии файла", "Файл не удалось открыть");
+    else{
+        QString err = fileOut.errorString();
+        if(err != "No file name specified")
+            QMessageBox::warning(this, "Ошибка при открытии файла", "Файл не удалось открыть");
+    }
 }
 
 void secondwindow::recordButtonClick()

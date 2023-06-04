@@ -1,4 +1,4 @@
-QT       += core gui
+QT += core gui
 QT += serialport
 win32:RC_ICONS += logo.ico
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

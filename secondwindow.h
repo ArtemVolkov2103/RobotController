@@ -39,6 +39,7 @@ public:
     QLineEdit *maxServoVal;
     QPushButton *applyServoVal;
 
+    void closeEvent(QCloseEvent *event);
 public slots:
     void recieveData(int);
 private slots:
@@ -49,7 +50,7 @@ private slots:
     void minButtonClick(int);
     void maxButtonClick(int);
     void resButtonClick(int);
-
+    void OnClose();
     void connectButtonClick();
 
     void loadButtonClick();

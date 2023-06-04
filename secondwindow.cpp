@@ -35,6 +35,10 @@
 #include <QHeaderView>
 #include <QRegularExpression>
 
+QSettings settings6("SecondWindowSettings6");
+QSettings settings8("SecondWindowSettings8");
+QSettings settingsAny("SecondWindowSettingsAny");
+
 int servoCount = 6;
 QList<QLineEdit *> servoNum;
 QList<QLabel *> sliderValueLabels;
@@ -66,7 +70,6 @@ secondwindow::secondwindow(QWidget *parent) :
     ui(new Ui::secondwindow)
 {
     ui->setupUi(this);
-
     //this->setStyleSheet("Background-image: url('C:/Users/ThinkBook/Downloads/1642665931_60-phonoteka-org-p-fon-karbon-63.jpg')");
     setWindowTitle(tr("Дипломная работа 'RobotController' "));
     for(int i=0; i<20; i++){
@@ -179,10 +182,27 @@ void secondwindow::recieveData(int count){
     QButtonGroup* resButonsGroup = new QButtonGroup(this);
 
     for (int i = 0; i < servoCount; ++i){
-        //servoNum.at(i)->moveCursor (QTextCursor::End);
-        servoNum.at(i)->setText("Servo " + QString::number(i));
+        QString iValue;
+
+        switch (servoCount) {
+        case 6:
+            iValue=settings6.value(QString::number(i)).toString();
+            break;
+        case 8:
+            iValue=settings8.value(QString::number(i)).toString();
+            break;
+        default:
+            iValue=settingsAny.value(QString::number(i)).toString();
+            break;
+        }
+
+        if(iValue != "")
+            servoNum.at(i)->setText(iValue);
+        else
+            servoNum.at(i)->setText("Servo " + QString::number(i));
         servoNum.at(i)->setObjectName("servoNum");
         servoNum.at(i)->setGeometry(10, i*30+20, 90, 20); //длинна от 10 до 90px
+        //connect(servoNum.at(i), &QApplication::lastWindowClosed, this, &secondwindow::OnClose);
 
         buttonsMin.at(i)->setText("MIN");
         buttonsMin.at(i)->setGeometry(110, i*30+20, 45, 20);
@@ -208,6 +228,7 @@ void secondwindow::recieveData(int count){
         sliders.at(i)->setGeometry(340, i*30+14, 400, 26);
 
     }
+
     connect(minButonsGroup, &QButtonGroup::idClicked, this, &secondwindow::minButtonClick);
     connect(maxButonsGroup, &QButtonGroup::idClicked, this, &secondwindow::maxButtonClick);
     connect(resButonsGroup, &QButtonGroup::idClicked, this, &secondwindow::resButtonClick);
@@ -310,6 +331,26 @@ void secondwindow::findAvailableComPorts(){
             comPortName->addItem(serialPortInfo.portName());
         //qDebug()<<serialPortInfo.description()<<" @@@ "<<serialPortInfo.manufacturer();//USB-SERIAL CH340
     }
+}
+
+void secondwindow::closeEvent(QCloseEvent *event)
+{
+    switch (servoCount) {
+    case 6:
+        for(int i=0; i < servoCount; i++)
+            settings6.setValue(QString::number(i), servoNum.at(i)->text());
+        break;
+    case 8:
+        for(int i=0; i < servoCount; i++)
+            settings8.setValue(QString::number(i), servoNum.at(i)->text());
+        break;
+    default:
+        for(int i=0; i < servoCount; i++)
+            settingsAny.setValue(QString::number(i), servoNum.at(i)->text());
+        break;
+    }
+
+    event->accept();
 }
 
 bool isAutoClicked = false;
@@ -782,6 +823,10 @@ void secondwindow::downButtonClick(){
             tableView->setModel(model);
         }
     }
+}
+
+void secondwindow::OnClose(){
+
 }
 
 void secondwindow::minServoValChanged(){
